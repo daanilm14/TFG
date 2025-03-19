@@ -1,0 +1,26 @@
+CREATE TABLE Usuarios(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    passwd VARCHAR(100) NOT NULL,
+    rol ENUM('administrador', 'usuario') NOT NULL
+);
+
+CREATE TABLE Espacios(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT NOT NULL,
+    horario_inicio TIME NOT NULL,
+    horario_fin TIME NOT NULL,
+    capacidad INT NOT NULL
+);
+
+CREATE TABLE Reservas(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    id_espacio INT NOT NULL,
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES Usuarios(id),
+    FOREIGN KEY (id_espacio) REFERENCES Espacios(id)
+);
