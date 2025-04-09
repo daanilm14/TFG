@@ -26,7 +26,6 @@ class Usuario{
 
       // 2️ Guardar datos del usuario en Firestore (sin la contraseña)
       await FirebaseFirestore.instance.collection('Usuarios').doc(uid).set({
-        'uid': uid,  
         'nombre': nombre,
         'email': email,
         'rol': rol,
@@ -39,7 +38,7 @@ class Usuario{
   }
 
   // Método para iniciar sesión de un usuario en la base de datos.
-Future<Map<String, dynamic>?> loginUsuario() async {
+  Future<Map<String, dynamic>?> loginUsuario() async {
     try {
       // 1️⃣ Iniciar sesión en Firebase Auth
       UserCredential credencial = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -48,7 +47,6 @@ Future<Map<String, dynamic>?> loginUsuario() async {
       );
 
       uid = credencial.user!.uid;
-      print("✅ Usuario autenticado con UID: $uid");
 
       // 2️⃣ Buscar en Firestore el usuario con ese UID
       DocumentSnapshot doc = await FirebaseFirestore.instance.collection('Usuarios').doc(uid).get();
