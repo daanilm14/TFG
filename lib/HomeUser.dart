@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:tfg/HomeAdmin.dart';
+import 'package:tfg/Usuario.dart';
 
 class HomeUser extends StatelessWidget {
+
+
+  final Usuario usuario;
+  const HomeUser({super.key, required this.usuario});
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

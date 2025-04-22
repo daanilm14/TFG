@@ -52,12 +52,12 @@ class _LoginScreenState extends State<LoginScreen> {
       if (rol == "administrador") {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeAdmin()),
+          MaterialPageRoute(builder: (context) => HomeAdmin(usuario: usuario)),
         );
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeUser()),
+          MaterialPageRoute(builder: (context) => HomeUser(usuario: usuario)),
         );
       }
     } else {

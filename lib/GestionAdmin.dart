@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tfg/Usuario.dart';
 import 'HomeAdmin.dart';
 import 'CrearUsuario.dart';
 import 'ImportarHorarios.dart';
@@ -8,7 +9,9 @@ import 'ListaPeticiones.dart';
 import 'ListaEspacios.dart';
 
 class GestionAdmin extends StatelessWidget {
-  const GestionAdmin({super.key});
+
+    final Usuario usuario;
+    const GestionAdmin({super.key, required this.usuario});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +67,7 @@ class GestionAdmin extends StatelessWidget {
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => HomeAdmin()),
+                            MaterialPageRoute(builder: (context) => HomeAdmin(usuario: usuario)),
                           );
                         },
                       ),
@@ -99,7 +102,7 @@ class GestionAdmin extends StatelessWidget {
                   final items = [
                     ['Crear Usuario', Icons.person_add, CrearUsuario()],
                     ['Importar Horarios', Icons.note_add, ImportarHorarios()],
-                    ['Lista de Usuarios', Icons.list, ListaUsuarios()],
+                    ['Lista de Usuarios', Icons.list, ListaUsuarios(usuario: usuario)],
                     ['Crear Espacio', Icons.add_box, CrearEspacio()],
                     ['Lista de Peticiones', Icons.format_list_bulleted, ListaPeticiones()],
                     ['Lista de Espacios', Icons.format_list_bulleted, ListaEspacios()],
@@ -120,8 +123,4 @@ class GestionAdmin extends StatelessWidget {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: GestionAdmin(),
-  ));
-}
+

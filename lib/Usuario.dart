@@ -37,6 +37,28 @@ class Usuario{
     }
   }
 
+  // Método para obtener todos los usuarios de la base de datos.
+  Future<List<Map<String, dynamic>>> getUsuarios() async {
+    List<Map<String, dynamic>> listaUsuarios = [];
+
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Usuarios').get();
+
+      for (var doc in querySnapshot.docs) {
+        Map<String, dynamic> datosUsuario = {
+          'uid': doc.id, // Obtener UID
+          'nombre': doc['nombre'], // Obtener nombre
+          'rol': doc['rol'], // Obtener rol
+        };
+        listaUsuarios.add(datosUsuario);
+      }
+    } catch (e) {
+      print('Error obteniendo usuarios: $e');
+    }
+
+    return listaUsuarios;
+  }
+
   // Método para iniciar sesión de un usuario en la base de datos.
   Future<Map<String, dynamic>?> loginUsuario() async {
     try {
@@ -76,12 +98,12 @@ class Usuario{
 
 
   // Método para eliminar un usuario de la base de datos.
-  Future<void> deleteUsuario(String email) async {
+  Future<void> deleteUsuario(String uid) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
         
           .collection('Usuarios')
-          .where('email', isEqualTo: email)
+          .where('uid', isEqualTo: uid)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {

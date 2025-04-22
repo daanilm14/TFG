@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:tfg/Usuario.dart';
 import 'GestionAdmin.dart'; // Importa la clase GestionAdmin
 
 class HomeAdmin extends StatelessWidget {
+
+  final Usuario usuario;
+  const HomeAdmin({super.key, required this.usuario});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +27,7 @@ class HomeAdmin extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => GestionAdmin()),
+                  MaterialPageRoute(builder: (context) => GestionAdmin(usuario: usuario)),
                 );
               },
               child: Text('Ir a Gestión'),
