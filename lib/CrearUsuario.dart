@@ -31,8 +31,9 @@ class _CrearUsuarioState extends State<CrearUsuario> {
       return;
     }
 
-    Usuario usuario = Usuario(nombre: nombre, email: email, passwd: passwd);
+    Usuario usuario = Usuario(uid: '',nombre: nombre, email: email, rol: rol);
     await usuario.addUsuario(nombre, email, passwd, rol);
+  
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Usuario creado con éxito')),

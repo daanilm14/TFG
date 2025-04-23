@@ -4,14 +4,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class Usuario{
   // Atributos
-  String? uid;
+  String uid;
   String nombre;
   String email;
-  String passwd;
-  String? rol;
+  String rol;
+
+  // Método para crear un Usuario desde un Map
+  factory Usuario.fromMap(Map<String, dynamic> map, String uid) {
+    return Usuario(
+      uid: map['uid'] ?? '',
+      nombre: map['nombre'] ?? '',
+      email: map['email'] ?? '',
+      rol: map['rol'] ?? ''
+    );
+  }
 
   // Constructor
-  Usuario({required this.nombre, required this.email, required this.passwd});
+  Usuario({required this.uid, required this.nombre, required this.email, required this.rol});
 
   // Método para registrar un nuevo usuario en la base de datos.
   Future<void> addUsuario(String nombre, String email, String passwd, String rol) async {
@@ -38,29 +47,35 @@ class Usuario{
   }
 
   // Método para obtener todos los usuarios de la base de datos.
-  Future<List<Map<String, dynamic>>> getUsuarios() async {
-    List<Map<String, dynamic>> listaUsuarios = [];
+  Future<List<Usuario>> getUsuarios() async {
+    List<Usuario> listaUsuarios = [];
 
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Usuarios').get();
 
-      for (var doc in querySnapshot.docs) {
-        Map<String, dynamic> datosUsuario = {
-          'uid': doc.id, // Obtener UID
-          'nombre': doc['nombre'], // Obtener nombre
-          'rol': doc['rol'], // Obtener rol
-        };
-        listaUsuarios.add(datosUsuario);
+      // Si no hay documentos en la colección
+      if (querySnapshot.docs.isEmpty) {
+        print('No se encontraron usuarios.');
+        return listaUsuarios;
       }
+
+      // Procesar documentos de la colección
+      for (var doc in querySnapshot.docs) {
+        Usuario usuario = Usuario.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+        listaUsuarios.add(usuario);
+      }
+
     } catch (e) {
       print('Error obteniendo usuarios: $e');
+      // Si ocurre un error, retorna una lista vacía
+      return [];
     }
 
     return listaUsuarios;
   }
 
   // Método para iniciar sesión de un usuario en la base de datos.
-  Future<Map<String, dynamic>?> loginUsuario() async {
+  Future<Map<String, dynamic>?> loginUsuario(String passwd) async {
     try {
       // 1️⃣ Iniciar sesión en Firebase Auth
       UserCredential credencial = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -77,7 +92,7 @@ class Usuario{
         Map<String, dynamic> datosUsuario = doc.data() as Map<String, dynamic>;
         nombre = datosUsuario['nombre'];  // Obtener el nombre
         rol = datosUsuario['rol'];  // Obtener el rol
-        print("✅ Usuario encontrado en Firestore: ${datosUsuario}");
+        print("Usuario encontrado en Firestore: ${datosUsuario}");
 
         return {
           "nombre": nombre,
@@ -86,38 +101,16 @@ class Usuario{
           "rol": rol,
         };
       } else {
-        print("❌ Usuario no encontrado en Firestore.");
+        print("Usuario no encontrado en Firestore.");
         return null;
       }
     } catch (e) {
-      print("❌ Error al iniciar sesión: $e");
+      print("Error al iniciar sesión: $e");
       return null;
     }
   }
 
 
-
-  // Método para eliminar un usuario de la base de datos.
-  Future<void> deleteUsuario(String uid) async {
-    try {
-      final querySnapshot = await FirebaseFirestore.instance
-        
-          .collection('Usuarios')
-          .where('uid', isEqualTo: uid)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        await FirebaseFirestore.instance
-            .collection('Usuarios')
-            .doc(querySnapshot.docs.first.id)
-            .delete();
-      } else {
-        print('Usuario no encontrado con el email proporcionado.');
-      }
-    } catch (e) {
-      print('Error eliminando usuario: $e');
-    }
-  }
 
   // Método para modificar el Nombre de un usuario en la base de datos.
   Future<void> updateNombre(String email, String nuevoNombre) async {
@@ -141,11 +134,11 @@ class Usuario{
   }
 
   // Método para modificar el rol de un usuario en la base de datos.
-  Future<void> updateRol(String email, String nuevoRol) async {
+  Future<void> updateRol(String uid, String nuevoRol) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Usuarios')
-          .where('email', isEqualTo: email)
+          .where('uid', isEqualTo: uid)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
@@ -158,6 +151,22 @@ class Usuario{
       }
     } catch (e) {
       print('Error actualizando rol de usuario: $e');
+    }
+  }
+
+  // Método para actualizar la contraseña del usuario actualmente autenticado
+  Future<void> updatePassword(String nuevaPassword) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        await user.updatePassword(nuevaPassword);
+        print('Contraseña actualizada correctamente.');
+      } else {
+        print('No hay usuario autenticado actualmente.');
+      }
+    } catch (e) {
+      print(' Error actualizando la contraseña: $e');
     }
   }
 

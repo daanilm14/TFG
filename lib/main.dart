@@ -41,8 +41,8 @@ class _LoginScreenState extends State<LoginScreen> {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
-    Usuario usuario = Usuario(nombre: '',email: email, passwd: password);
-    Map<String, dynamic>? datosUsuario = await usuario.loginUsuario();
+    Usuario usuario = Usuario(uid: '',nombre: '',email: email, rol:'');
+    Map<String, dynamic>? datosUsuario = await usuario.loginUsuario(password);
     print(datosUsuario); // Imprimir los datos del usuario para depuración
 
     if (datosUsuario != null) {

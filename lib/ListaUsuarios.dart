@@ -1,45 +1,41 @@
 import 'package:flutter/material.dart';
 import 'EditarUsuario.dart';
-import 'Usuario.dart'; // Aquí debe estar getUsuarios()
+import 'Usuario.dart';
 
-class ListaUsuarios extends StatelessWidget {
-
+class ListaUsuarios extends StatefulWidget {
   final Usuario usuario;
   const ListaUsuarios({super.key, required this.usuario});
+
+  @override
+  State<ListaUsuarios> createState() => _ListaUsuariosState();
+}
+
+class _ListaUsuariosState extends State<ListaUsuarios> {
+  late Future<List<Map<String, dynamic>>> futureUsuarios;
+
+  @override
+  void initState() {
+    super.initState();
+    futureUsuarios = cargarUsuarios();
+  }
+
+  Future<List<Map<String, dynamic>>> cargarUsuarios() async {
+    final usuarios = await widget.usuario.getUsuarios();
+    return usuarios.map((u) => {
+      'uid': u.uid,
+      'nombre': u.nombre,
+      'email': u.email,
+      'rol': u.rol,
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    final double iconRadius = screenWidth * 0.03;
-    final double iconSize = screenWidth * 0.03;
-    final double fontSize = screenWidth * 0.025;
     final double titleSize = screenWidth * 0.04;
     final double backIconSize = screenWidth * 0.025;
-
-    Widget buildButton(String label, IconData icon, Widget screen) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => screen),
-              );
-            },
-            child: CircleAvatar(
-              radius: iconRadius,
-              backgroundColor: Colors.grey.shade300,
-              child: Icon(icon, size: iconSize, color: Colors.black),
-            ),
-          ),
-          SizedBox(height: screenHeight * 0.005), // menos espacio entre ícono y texto
-          Text(label, style: TextStyle(fontSize: fontSize), textAlign: TextAlign.center),
-        ],
-      );
-    }
 
     return Scaffold(
       body: SafeArea(
@@ -53,36 +49,37 @@ class ListaUsuarios extends StatelessWidget {
               // CABECERA
               Column(
                 children: [
-                Row(
-                  children: [
-                    IconButton(
-                      iconSize: backIconSize, // Tamaño del ícono de la flecha
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          'LISTA DE USUARIOS', // Título con tamaño dinámico
-                          style: TextStyle(
-                            fontSize: titleSize, // Tamaño del título
-                            fontWeight: FontWeight.bold,
+                  Row(
+                    children: [
+                      IconButton(
+                        iconSize: backIconSize,
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            'LISTA DE USUARIOS',
+                            style: TextStyle(
+                              fontSize: titleSize,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: backIconSize), // Espacio a la derecha del ícono
-                  ],
-                ),
-                  SizedBox(height: screenHeight * 0.04), // más espacio
+                      SizedBox(width: backIconSize),
+                    ],
+                  ),
+                  SizedBox(height: screenHeight * 0.04),
                 ],
               ),
+
               // CONTENIDO
               Expanded(
-                child: FutureBuilder<List<Map<String, dynamic>>>( // Aquí se cargan los usuarios
-                  future: usuario.getUsuarios(),
+                child: FutureBuilder<List<Map<String, dynamic>>>(
+                  future: futureUsuarios,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -98,7 +95,14 @@ class ListaUsuarios extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       itemCount: usuarios.length,
                       itemBuilder: (context, index) {
-                        final usuario = usuarios[index];
+                        final usuarioMap = usuarios[index];
+
+                        Usuario usuario = Usuario(
+                          uid: usuarioMap['uid'],
+                          nombre: usuarioMap['nombre'],
+                          email: usuarioMap['email'],
+                          rol: usuarioMap['rol'],
+                        );
 
                         return Card(
                           shape: RoundedRectangleBorder(
@@ -107,17 +111,20 @@ class ListaUsuarios extends StatelessWidget {
                           ),
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
-                            title: Text(usuario['nombre']),
-                            subtitle: Text(usuario['rol']),
+                            title: Text(usuario.nombre),
+                            subtitle: Text(usuario.rol),
                             trailing: IconButton(
                               icon: const Icon(Icons.edit),
-                              onPressed: () {
-                                Navigator.push(
+                              onPressed: () async {
+                                await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => EditarUsuario(usuario: usuario),
                                   ),
                                 );
+                                setState(() {
+                                  futureUsuarios = cargarUsuarios();
+                                });
                               },
                             ),
                           ),
