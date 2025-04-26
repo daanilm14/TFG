@@ -46,6 +46,8 @@ class Usuario{
     }
   }
 
+
+
   // Método para obtener todos los usuarios de la base de datos.
   Future<List<Usuario>> getUsuarios() async {
     List<Usuario> listaUsuarios = [];

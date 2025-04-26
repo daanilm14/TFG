@@ -24,7 +24,6 @@ class _EditarUsuarioState extends State<EditarUsuario> {
     final contrasena = contrasenaController.text.trim();
     final rol = rolSeleccionado;
 
-    // Validación
     if (contrasena.isEmpty && rol == widget.usuario.rol) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No hay cambios para guardar')),
@@ -32,7 +31,6 @@ class _EditarUsuarioState extends State<EditarUsuario> {
       return;
     }
 
-    // Validar contraseña si se intenta cambiar
     if (contrasena.isNotEmpty && contrasena.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('La contraseña debe tener al menos 6 caracteres')),
@@ -40,7 +38,6 @@ class _EditarUsuarioState extends State<EditarUsuario> {
       return;
     }
 
-    // Actualizar datos según sea necesario
     try {
       if (contrasena.isNotEmpty && contrasena.length >= 6) {
         await widget.usuario.updatePassword(contrasena);
@@ -53,10 +50,23 @@ class _EditarUsuarioState extends State<EditarUsuario> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cambios guardados correctamente')),
       );
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al actualizar: $e')),
+      );
+    }
+  }
+
+  void borrarUsuario() async {
+    try {
+      //await widget.usuario.deleteUsuario(widget.usuario.uid);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuario eliminado correctamente')),
+      );
+      Navigator.pop(context); // Volver atrás después de eliminar
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al eliminar: $e')),
       );
     }
   }
@@ -105,7 +115,13 @@ class _EditarUsuarioState extends State<EditarUsuario> {
                   SizedBox(height: screenHeight * 0.04),
 
                   // CAMPO CONTRASEÑA
-                  const Text('Contraseña'),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      'Contraseña',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                   TextField(
                     controller: contrasenaController,
                     obscureText: true,
@@ -120,7 +136,13 @@ class _EditarUsuarioState extends State<EditarUsuario> {
                   const SizedBox(height: 20),
 
                   // CAMPO ROL
-                  const Text('ROL'),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      'ROL',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                   DropdownButtonFormField<String>(
                     value: rolSeleccionado,
                     decoration: InputDecoration(
@@ -141,26 +163,49 @@ class _EditarUsuarioState extends State<EditarUsuario> {
                     }).toList(),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 50), // Espacio extra antes de los botones
 
-                  // BOTÓN GUARDAR
+                  // BOTONES GUARDAR Y BORRAR
                   Center(
-                    child: ElevatedButton(
-                      onPressed: editarUsuario,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: editarUsuario,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                          ),
+                          child: const Text(
+                            'Guardar',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                      ),
-                      child: const Text(
-                        'Guardar',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
+                        const SizedBox(width: 20),
+                        ElevatedButton(
+                          onPressed: borrarUsuario,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                          ),
+                          child: const Text(
+                            'Borrar Usuario',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ],
