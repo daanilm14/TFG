@@ -46,6 +46,22 @@ class Usuario{
     }
   }
 
+  // Método para eliminar un usuario de la base de datos.
+  /*
+  * En este caso únicamente se elimina el usuario de la base de datos, no se elimina el usuario de Firebase Authentication.
+  * Para poder eliminar la cuenta de Firebase Authentication se debe hacer desde la aplicación de Firebase, debido a que no
+  * se puede elininar haciendo referencia a un usuario que no sea el actualmente autenticado con el plan gratuito.
+  */
+  Future<void> deleteUsuario(String uid) async {
+    try {
+      // Eliminar el usuario de Firestore
+      await FirebaseFirestore.instance.collection('Usuarios').doc(uid).delete();
+      print('Usuario eliminado de Firestore');
+    } catch (e) {
+      print('Error eliminando usuario: $e');
+    }
+  }
+
 
 
   // Método para obtener todos los usuarios de la base de datos.
@@ -79,7 +95,7 @@ class Usuario{
   // Método para iniciar sesión de un usuario en la base de datos.
   Future<Map<String, dynamic>?> loginUsuario(String passwd) async {
     try {
-      // 1️⃣ Iniciar sesión en Firebase Auth
+      // Iniciar sesión en Firebase Auth
       UserCredential credencial = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: passwd,
@@ -87,7 +103,7 @@ class Usuario{
 
       uid = credencial.user!.uid;
 
-      // 2️⃣ Buscar en Firestore el usuario con ese UID
+      // Buscar en Firestore el usuario con ese UID
       DocumentSnapshot doc = await FirebaseFirestore.instance.collection('Usuarios').doc(uid).get();
 
       if (doc.exists) {

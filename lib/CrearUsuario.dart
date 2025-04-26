@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'Usuario.dart'; 
 
 class CrearUsuario extends StatefulWidget {
@@ -45,9 +43,6 @@ class _CrearUsuarioState extends State<CrearUsuario> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Definir los tamaños dinámicos para el ícono y el texto
-    final double iconSize = screenWidth * 0.03;
-    final double fontSize = screenWidth * 0.025;
     final double titleSize = screenWidth * 0.04;
     final double backIconSize = screenWidth * 0.025;
 

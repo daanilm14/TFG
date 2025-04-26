@@ -20,6 +20,9 @@ class _EditarUsuarioState extends State<EditarUsuario> {
     rolSeleccionado = widget.usuario.rol; // Inicializar con el rol actual
   }
 
+  // Método para editar el usuario
+  // Se actualiza la contraseña y el rol del usuario en la base de datos.
+  // Se muestra un mensaje de éxito o error según corresponda.
   void editarUsuario() async {
     final contrasena = contrasenaController.text.trim();
     final rol = rolSeleccionado;
@@ -57,10 +60,13 @@ class _EditarUsuarioState extends State<EditarUsuario> {
     }
   }
 
+  // Método para eliminar el usuario
+  // Se elimina el usuario de la base de datos y se vuelve a la pantalla anterior.
+  // Se muestra un mensaje de éxito o error según corresponda.
   void borrarUsuario() async {
     try {
-      //await widget.usuario.deleteUsuario(widget.usuario.uid);
-      ScaffoldMessenger.of(context).showSnackBar(
+      await widget.usuario.deleteUsuario(widget.usuario.uid); // Eliminar el usuario de la base de datos
+      ScaffoldMessenger.of(context).showSnackBar(                         // Mostrar mensaje de éxito
         const SnackBar(content: Text('Usuario eliminado correctamente')),
       );
       Navigator.pop(context); // Volver atrás después de eliminar
@@ -71,13 +77,15 @@ class _EditarUsuarioState extends State<EditarUsuario> {
     }
   }
 
+  // Interfaz de usuario
+  // Se utiliza un diseño responsivo para adaptarse a diferentes tamaños de pantalla.
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;        // Ancho de la pantalla
+    final screenHeight = MediaQuery.of(context).size.height;      // Alto de la pantalla  
 
-    final double titleSize = screenWidth * 0.04;
-    final double backIconSize = screenWidth * 0.025;
+    final double titleSize = screenWidth * 0.04;                  // Tamaño del título  
+    final double backIconSize = screenWidth * 0.025;              // Tamaño del ícono de la flecha de retroceso 
 
     return Scaffold(
       body: SafeArea(
