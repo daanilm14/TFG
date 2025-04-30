@@ -108,12 +108,27 @@ class _EditarUsuarioState extends State<EditarUsuario> {
                       ),
                       Expanded(
                         child: Center(
-                          child: Text(
-                            'EDITAR USUARIO',
-                            style: TextStyle(
-                              fontSize: titleSize,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'EDITAR USUARIO',
+                                style: TextStyle(
+                                  fontSize: titleSize,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                widget.usuario.nombre,
+                                style: TextStyle(
+                                  fontSize: titleSize * 0.8,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.grey[700],
+                                ),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
                       ),

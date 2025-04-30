@@ -18,6 +18,7 @@ class _CrearEspacioState extends State<CrearEspacio> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: horaInicio,
+      initialEntryMode: TimePickerEntryMode.input,
     );
     if (picked != null) {
       setState(() {
@@ -30,6 +31,7 @@ class _CrearEspacioState extends State<CrearEspacio> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: horaFin,
+      initialEntryMode: TimePickerEntryMode.input,
     );
     if (picked != null) {
       setState(() {

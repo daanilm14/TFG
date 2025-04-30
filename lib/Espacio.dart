@@ -49,6 +49,43 @@ class Espacio{
     }
   }
 
+  //Método para modificar el nombre de un espacio en la base de datos.
+ Future<bool> updateNombre(String nombre, String nuevoNombre) async {
+  try {
+    // Verificar si ya existe un espacio con el nuevo nombre
+    final existingQuerySnapshot = await FirebaseFirestore.instance
+        .collection('Espacios')
+        .where('nombre', isEqualTo: nuevoNombre)
+        .get();
+
+    if (existingQuerySnapshot.docs.isNotEmpty) {
+      print('Ya existe un espacio con el nuevo nombre proporcionado.');
+      return false; // No realizar cambios si el nombre está repetido
+    }
+
+    // Buscar el espacio con el nombre actual
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('Espacios')
+        .where('nombre', isEqualTo: nombre)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('Espacios')
+          .doc(querySnapshot.docs.first.id)
+          .update({'nombre': nuevoNombre});
+      return true; // Actualización exitosa
+    } else {
+      print('Espacio no encontrado con el nombre proporcionado.');
+      return false;
+    }
+  } catch (e) {
+    print('Error actualizando nombre de espacio: $e');
+    return false;
+  }
+}
+
+
   // Método para modificar la capacidad de un espacio en la base de datos.
   Future<void> updateCapacidad(String nombre, int nuevaCapacidad) async {
     try {
@@ -70,8 +107,8 @@ class Espacio{
     }
   }
 
-  // Método para modificar el horario de un espacio en la base de datos.
-  Future<void> updateHorario(String nombre, String nuevoHorarioIni, String nuevoHorarioFin) async {
+  // Método para modificar el horario inicial de un espacio en la base de datos.
+  Future<void> updateHorarioIni(String nombre, TimeOfDay nuevoHorarioIni) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Espacios')
@@ -83,14 +120,36 @@ class Espacio{
             .collection('Espacios')
             .doc(querySnapshot.docs.first.id)
             .update({
-          'horarioIni': nuevoHorarioIni,
-          'horarioFin': nuevoHorarioFin,
+          'horarioIni': '${nuevoHorarioIni.hour.toString().padLeft(2, '0')}:${nuevoHorarioIni.minute.toString().padLeft(2, '0')}',
         });
       } else {
         print('Espacio no encontrado con el nombre proporcionado.');
       }
     } catch (e) {
-      print('Error actualizando horario de espacio: $e');
+      print('Error actualizando horario inicial de espacio: $e');
+    }
+  }
+
+  // Método para modificar el horario final de un espacio en la base de datos.
+  Future<void> updateHorarioFin(String nombre, TimeOfDay nuevoHorarioFin) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Espacios')
+          .where('nombre', isEqualTo: nombre)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('Espacios')
+            .doc(querySnapshot.docs.first.id)
+            .update({
+          'horarioFin': '${nuevoHorarioFin.hour.toString().padLeft(2, '0')}:${nuevoHorarioFin.minute.toString().padLeft(2, '0')}',
+        });
+      } else {
+        print('Espacio no encontrado con el nombre proporcionado.');
+      }
+    } catch (e) {
+      print('Error actualizando horario final de espacio: $e');
     }
   }
 
