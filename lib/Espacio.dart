@@ -208,5 +208,73 @@ class Espacio{
     return TimeOfDay(hour: hour, minute: minute);
   }
 
+
+  // Obtener un espacio por nombre
+ static Future<Espacio?> getEspacioPorNombre(String nombre) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Espacios')
+          .where('nombre', isEqualTo: nombre)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        var doc = querySnapshot.docs.first;
+        return Espacio(
+          nombre: doc['nombre'],
+          capacidad: doc['capacidad'],
+          horarioIni: _parseHora(doc['horarioIni']),
+          horarioFin: _parseHora(doc['horarioFin']),
+          descripcion: doc['descripcion'],
+        );
+      } else {
+        print('Espacio no encontrado con el nombre proporcionado.');
+        return null;
+      }
+    } catch (e) {
+      print('Error obteniendo espacio por nombre: $e');
+      return null;
+    }
+  }
+
+  // Obtener espacio por ID (documentId)
+  static Future<Espacio?> getEspacioPorId(String docId) async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection('Espacios').doc(docId).get();
+
+      if (doc.exists) {
+        var data = doc.data()!;
+        return Espacio(
+          nombre: data['nombre'],
+          capacidad: data['capacidad'],
+          horarioIni: _parseHora(data['horarioIni']),
+          horarioFin: _parseHora(data['horarioFin']),
+          descripcion: data['descripcion'],
+        );
+      } else {
+        print('Espacio no encontrado con el id proporcionado.');
+        return null;
+      }
+    } catch (e) {
+      print('Error obteniendo espacio por ID: $e');
+      return null;
+    }
+  }
+
+  // Verificar si un espacio existe por nombre
+  static Future<bool> existeEspacioConNombre(String nombre) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Espacios')
+          .where('nombre', isEqualTo: nombre)
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error verificando existencia de espacio: $e');
+      return false;
+    }
+  }
+
+
 }
 

@@ -165,4 +165,99 @@ class Reserva{
 
 
 
+  // Obtener todas las reservas (sin filtro)
+  static Future<List<Reserva>> getTodasReservas() async {
+    List<Reserva> reservas = [];
+    try {
+      final querySnapshot = await FirebaseFirestore.instance.collection('Reservas').get();
+
+      for (var doc in querySnapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+
+        // Obtener el nombre del espacio
+        final espacioDoc = await FirebaseFirestore.instance
+            .collection('Espacios')
+            .doc(data['id_espacio'])
+            .get();
+
+        if (espacioDoc.exists) {
+          data['id_espacio'] = espacioDoc.data()?['nombre'] ?? 'Nombre no disponible';
+        } else {
+          data['id_espacio'] = 'Espacio no encontrado';
+        }
+
+        reservas.add(Reserva.fromMap(data));
+      }
+    } catch (e) {
+      print('Error obteniendo todas las reservas: $e');
+    }
+    return reservas;
+  }
+
+  // Obtener reservas por espacio (id_espacio)
+  static Future<List<Reserva>> getReservasPorIdEspacio(String id_espacio) async {
+    List<Reserva> reservas = [];
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Reservas')
+          .where('id_espacio', isEqualTo: id_espacio)
+          .get();
+
+      for (var doc in querySnapshot.docs) {
+        Map<String, dynamic> data = doc.data();
+
+        reservas.add(Reserva.fromMap(data));
+      }
+    } catch (e) {
+      print('Error obteniendo reservas por id_espacio: $e');
+    }
+    return reservas;
+  }
+
+  // Actualizar descripción o evento de una reserva
+  Future<void> updateDescripcionYEvento(String id_usuario, String id_espacio, String fecha, String nuevaDescripcion, String nuevoEvento) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Reservas')
+          .where('id_usuario', isEqualTo: id_usuario)
+          .where('id_espacio', isEqualTo: id_espacio)
+          .where('fecha', isEqualTo: fecha)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('Reservas')
+            .doc(querySnapshot.docs.first.id)
+            .update({
+          'descripcion': nuevaDescripcion,
+          'evento': nuevoEvento,
+        });
+      } else {
+        print('Reserva no encontrada con los datos proporcionados.');
+      }
+    } catch (e) {
+      print('Error actualizando descripción y evento de reserva: $e');
+    }
+  }
+
+  // Método para obtener reservas por fecha.
+  static Future<List<Reserva>> getReservasPorFecha(String fecha) async {
+    List<Reserva> reservas = [];
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Reservas')
+          .where('fecha', isEqualTo: fecha)
+          .get();
+
+      for (var doc in querySnapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        reservas.add(Reserva.fromMap(data));
+      }
+    } catch (e) {
+      print('Error obteniendo reservas por fecha: $e');
+    }
+    return reservas;
+  }
+
+
 }
