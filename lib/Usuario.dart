@@ -187,7 +187,4 @@ class Usuario{
       print(' Error actualizando la contraseña: $e');
     }
   }
-
-
-
 }

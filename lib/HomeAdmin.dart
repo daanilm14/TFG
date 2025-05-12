@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tfg/Usuario.dart';
-import 'GestionAdmin.dart'; // Importa la clase GestionAdmin
+import 'GestionAdmin.dart'; 
 
 class HomeAdmin extends StatelessWidget {
 
