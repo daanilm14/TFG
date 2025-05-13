@@ -1,25 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'Espacio.dart';
+import 'package:flutter/material.dart';
 
 class Reserva{
   // Atributos.
   String id_usuario;
   String id_espacio;
   String fecha;
+  TimeOfDay hora;
   String evento;
   String descripcion;
   String estado;
 
   // Constructor.
-  Reserva({required this.id_usuario, required this.id_espacio, required this.fecha, required this.evento,required this.descripcion, required this.estado});
+  Reserva({required this.id_usuario, required this.id_espacio, required this.fecha, required this.hora , required this.evento,required this.descripcion, required this.estado});
 
   // Método para agregar una reserva a la base de datos.
-  Future<void> addReserva(String id_usuario, String id_espacio, String fecha, String evento, String descripcion, String estado) async {
+  Future<void> addReserva(String id_usuario, String id_espacio, String fecha, TimeOfDay hora, String evento, String descripcion, String estado) async {
     try {
       await FirebaseFirestore.instance.collection('Reservas').add({
       'id_usuario': id_usuario,
       'id_espacio': id_espacio,
       'fecha': fecha,
+      'hora': '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}',
       'evento': evento,
       'estado': estado,
       });
@@ -30,16 +32,11 @@ class Reserva{
 
   // Método para convertir un mapa a un objeto Reserva.
   static Reserva fromMap(Map<String, dynamic> data) {
-    final DateTime dateTime = (data['fecha'] as Timestamp).toDate();
-
-    final String formattedDate = 
-        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')} '
-        '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
-
     return Reserva(
       id_usuario: data['id_usuario'],
       id_espacio: data['id_espacio'],
-      fecha: formattedDate, 
+      fecha: data['fecha'], 
+      hora: _parseHora(data['hora']), 
       evento: data['evento'],
       descripcion: data['descripcion'],
       estado: data['estado'],
@@ -48,15 +45,24 @@ class Reserva{
 
 
   
+  // Función auxiliar para convertir String "HH:mm" a TimeOfDay
+  static TimeOfDay _parseHora(String horaStr) {
+    final parts = horaStr.split(':');
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+    return TimeOfDay(hour: hour, minute: minute);
+  }
+  
 
   // Método para eliminar una reserva de la base de datos.
-  Future<void> deleteReserva(String id_usuario, String id_espacio, String fecha) async {
+  Future<void> deleteReserva(String id_usuario, String id_espacio, String fecha, TimeOfDay hora) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Reservas')
           .where('id_usuario', isEqualTo: id_usuario)
           .where('id_espacio', isEqualTo: id_espacio)
           .where('fecha', isEqualTo: fecha)
+          .where('hora', isEqualTo: '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}')
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
@@ -73,13 +79,14 @@ class Reserva{
   }
 
   // Método para modificar el estado de una reserva en la base de datos.
-  Future<void> updateEstado(String id_usuario, String id_espacio, String fecha, String nuevoEstado) async {
+  Future<void> updateEstado(String id_usuario, String id_espacio, String fecha, TimeOfDay hora, String nuevoEstado) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Reservas')
           .where('id_usuario', isEqualTo: id_usuario)
           .where('id_espacio', isEqualTo: id_espacio)
           .where('fecha', isEqualTo: fecha)
+          .where('hora', isEqualTo: '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}')
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
@@ -215,13 +222,14 @@ class Reserva{
   }
 
   // Actualizar descripción o evento de una reserva
-  Future<void> updateDescripcionYEvento(String id_usuario, String id_espacio, String fecha, String nuevaDescripcion, String nuevoEvento) async {
+  Future<void> updateDescripcionYEvento(String id_usuario, String id_espacio, String fecha, TimeOfDay hora, String nuevaDescripcion, String nuevoEvento) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Reservas')
           .where('id_usuario', isEqualTo: id_usuario)
           .where('id_espacio', isEqualTo: id_espacio)
           .where('fecha', isEqualTo: fecha)
+          .where('hora', isEqualTo: '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}')
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {

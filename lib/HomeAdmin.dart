@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'Espacio.dart';
 import 'Reserva.dart';
 import 'GestionAdmin.dart';
+import 'RealizarReserva.dart';
 
 class HomeAdmin extends StatefulWidget {
   final Usuario usuario;
@@ -26,11 +27,12 @@ class _HomeAdminState extends State<HomeAdmin> {
 
   void _loadData() {
     Espacio espacio = Espacio(
-        capacidad: 0,
-        horarioIni: TimeOfDay.now(),
-        horarioFin: TimeOfDay.now(),
-        nombre: '',
-        descripcion: '');
+      capacidad: 0,
+      horarioIni: TimeOfDay.now(),
+      horarioFin: TimeOfDay.now(),
+      nombre: '',
+      descripcion: '',
+    );
     _espaciosFuture = espacio.getEspacios();
     String formattedDate = DateFormat('dd/MM/yyyy').format(_selectedDate);
     _reservasFuture = Reserva.getReservasPorFecha(formattedDate);
@@ -84,10 +86,7 @@ class _HomeAdminState extends State<HomeAdmin> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
-        border: TableBorder.all(
-          color: Colors.grey,
-          width: 1,
-        ),
+        border: TableBorder.all(color: Colors.grey, width: 1),
         columns: [
           const DataColumn(label: Text('Espacio')),
           ...sortedHoras.map((hora) => DataColumn(label: Text(hora))).toList(),
@@ -102,29 +101,65 @@ class _HomeAdminState extends State<HomeAdmin> {
               }
 
               final reserva = reservas.firstWhere(
-                  (res) =>
-                      res.id_espacio == espacio.nombre &&
-                      res.fecha.contains(hora),
-                  orElse: () => Reserva(
-                    id_espacio: '',
-                    fecha: '',
-                    evento: '',
-                    id_usuario: '',
-                    descripcion: '',
-                    estado: '',
-                  ));
+                (res) =>
+                    res.id_espacio == espacio.nombre &&
+                    res.hora == TimeOfDay(
+                      hour: int.parse(hora.split(':')[0]),
+                      minute: int.parse(hora.split(':')[1]),
+                    ),
+                orElse: () => Reserva(
+                  id_espacio: '',
+                  fecha: '',
+                  hora: TimeOfDay(hour: 0, minute: 0),
+                  evento: '',
+                  id_usuario: '',
+                  descripcion: '',
+                  estado: '',
+                ),
+              );
 
               final bool hayReserva = reserva.id_espacio.isNotEmpty;
 
-              return DataCell(Container(
-                color: hayReserva ? Colors.redAccent : Colors.greenAccent,
-                alignment: Alignment.center,
-                child: Text(
-                  hayReserva ? reserva.evento : 'Libre',
-                  style: TextStyle(
-                      color: hayReserva ? Colors.white : Colors.black),
-                ),
-              ));
+              if (hayReserva) {
+                return DataCell(Container(
+                  color: Colors.redAccent,
+                  alignment: Alignment.center,
+                  child: Text(
+                    reserva.evento,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ));
+              } else {
+                return DataCell(
+                  SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RealizarReserva(
+                              usuario: widget.usuario,
+                              espacio: espacio,
+                              fecha: DateFormat('dd/MM/yyyy').format(_selectedDate),
+                              hora: TimeOfDay(
+                                hour: int.parse(hora.split(':')[0]),
+                                minute: int.parse(hora.split(':')[1]),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Icon(Icons.add),
+                    ),
+                  ),
+                );
+              }
             }).toList(),
           ]);
         }).toList(),
@@ -152,7 +187,6 @@ class _HomeAdminState extends State<HomeAdmin> {
         ),
         child: Column(
           children: [
-            // TÍTULO Y BOTÓN DE GESTIÓN (igual que HomeUser)
             Row(
               children: [
                 SizedBox(width: iconContainerSize),
@@ -172,8 +206,7 @@ class _HomeAdminState extends State<HomeAdmin> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            GestionAdmin(usuario: widget.usuario),
+                        builder: (context) => GestionAdmin(usuario: widget.usuario),
                       ),
                     );
                   },
@@ -188,8 +221,7 @@ class _HomeAdminState extends State<HomeAdmin> {
                           color: Colors.grey.shade300,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.settings,
-                            color: Colors.black, size: iconSize),
+                        child: Icon(Icons.settings, color: Colors.black, size: iconSize),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -202,7 +234,6 @@ class _HomeAdminState extends State<HomeAdmin> {
               ],
             ),
 
-            // SELECCIONADOR DE FECHA justo debajo del título
             SizedBox(height: screenHeight * 0.02),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -223,7 +254,6 @@ class _HomeAdminState extends State<HomeAdmin> {
 
             SizedBox(height: screenHeight * 0.02),
 
-            // TABLA
             Expanded(
               child: FutureBuilder<List<Espacio>>(
                 future: _espaciosFuture,
