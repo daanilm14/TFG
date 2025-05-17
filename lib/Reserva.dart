@@ -15,7 +15,7 @@ class Reserva{
   Reserva({required this.id_usuario, required this.id_espacio, required this.fecha, required this.hora , required this.evento,required this.descripcion, required this.estado});
 
   // Método para agregar una reserva a la base de datos.
-  Future<void> addReserva(String id_usuario, String id_espacio, String fecha, TimeOfDay hora, String evento, String descripcion, String estado) async {
+  static Future<void> addReserva(String id_usuario, String id_espacio, String fecha, TimeOfDay hora, String evento, String descripcion, String estado) async {
     try {
       await FirebaseFirestore.instance.collection('Reservas').add({
       'id_usuario': id_usuario,
