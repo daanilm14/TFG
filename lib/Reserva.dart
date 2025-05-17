@@ -211,9 +211,7 @@ class Reserva{
           .get();
 
       for (var doc in querySnapshot.docs) {
-        Map<String, dynamic> data = doc.data();
-
-        reservas.add(Reserva.fromMap(data));
+        reservas.add(Reserva.fromMap(doc.data()));
       }
     } catch (e) {
       print('Error obteniendo reservas por id_espacio: $e');
@@ -258,12 +256,13 @@ class Reserva{
           .get();
 
       for (var doc in querySnapshot.docs) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        reservas.add(Reserva.fromMap(data));
+        reservas.add(Reserva.fromMap(doc.data()));
+        print('Reserva obtenida: ${doc.data()}');
       }
     } catch (e) {
       print('Error obteniendo reservas por fecha: $e');
     }
+    
     return reservas;
   }
 

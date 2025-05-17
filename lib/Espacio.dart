@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class Espacio{
   // Atributos.
+  String? id_espacio;
   String nombre; 
   int capacidad;
   TimeOfDay horarioIni;
@@ -10,7 +11,7 @@ class Espacio{
   String descripcion;
 
   // Constructor.
-  Espacio({required this.nombre, required this.capacidad, required this.horarioIni, required this.horarioFin, required this.descripcion});
+  Espacio({this.id_espacio, required this.nombre, required this.capacidad, required this.horarioIni, required this.horarioFin, required this.descripcion});
 
   // Método para agregar un espacio a la base de datos.
   Future<void> addEspacio(String nombre, int capacidad, TimeOfDay horarioIni, TimeOfDay horarioFin, String descripcion) async {
@@ -175,7 +176,7 @@ class Espacio{
   }
 
 
-  Future<List<Espacio>> getEspacios() async {
+  static Future<List<Espacio>> getEspacios() async {
     List<Espacio> espacios = [];
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Espacios').get();
@@ -187,6 +188,7 @@ class Espacio{
 
       for (var doc in querySnapshot.docs) {
         espacios.add(Espacio(
+          id_espacio: doc.id,
           nombre: doc['nombre'],
           capacidad: doc['capacidad'],
           horarioIni: _parseHora(doc['horarioIni']),

@@ -16,20 +16,13 @@ class _ListaEspaciosState extends State<ListaEspacios> {
   void initState() {
     super.initState();
     // Creamos un objeto auxiliar de la clase Espacio
-    Espacio espacioAuxiliar = Espacio(
-      nombre: '',
-      capacidad: 0,
-      horarioIni: TimeOfDay(hour: 0, minute: 0),
-      horarioFin: TimeOfDay(hour: 0, minute: 0),
-      descripcion: '',
-    );
     // Cargamos los espacios utilizando el método getEspacios() del objeto auxiliar
-    futureEspacios = espacioAuxiliar.getEspacios();
+    futureEspacios = Espacio.getEspacios();
   }
 
   // Función para cargar los espacios a través del objeto auxiliar
-  Future<List<Espacio>> cargarEspacios(Espacio espacioAuxiliar) async {
-    final espacios = await espacioAuxiliar.getEspacios();
+  Future<List<Espacio>> cargarEspacios() async {
+    final espacios = await Espacio.getEspacios();
     return espacios;
   }
 
@@ -121,7 +114,7 @@ class _ListaEspaciosState extends State<ListaEspacios> {
                                 );
                                 setState(() {
                                   // Vuelve a cargar los espacios después de editar
-                                  futureEspacios = cargarEspacios(espacio);
+                                  futureEspacios = cargarEspacios();
                                 });
                               },
                             ),
