@@ -277,6 +277,23 @@ class Espacio{
     }
   }
 
+  static Future<String> getNombre(String uid) async {
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance.collection('Espacios').doc(uid).get();
+
+      if (doc.exists) {
+        Map<String, dynamic> datosEspacio = doc.data() as Map<String, dynamic>;
+        return datosEspacio['nombre'];
+      } else {
+        print("Espacios no encontrado en Firestore.");
+        return '';
+      }
+    } catch (e) {
+      print("Error al obtener el nombre del espacio: $e");
+      return '';
+    }
+  }
+
 
 }
 

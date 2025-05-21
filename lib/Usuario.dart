@@ -187,4 +187,21 @@ class Usuario{
       print(' Error actualizando la contraseña: $e');
     }
   }
+
+  static Future<String> getNombre(String uid) async {
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance.collection('Usuarios').doc(uid).get();
+
+      if (doc.exists) {
+        Map<String, dynamic> datosUsuario = doc.data() as Map<String, dynamic>;
+        return datosUsuario['nombre'];
+      } else {
+        print("Usuario no encontrado en Firestore.");
+        return '';
+      }
+    } catch (e) {
+      print("Error al obtener el nombre del usuario: $e");
+      return '';
+    }
+  }
 }

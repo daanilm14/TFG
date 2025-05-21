@@ -22,6 +22,7 @@ class Reserva{
       'id_espacio': id_espacio,
       'fecha': fecha,
       'hora': '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}',
+      'descripcion': descripcion,
       'evento': evento,
       'estado': estado,
       });
@@ -55,7 +56,7 @@ class Reserva{
   
 
   // Método para eliminar una reserva de la base de datos.
-  Future<void> deleteReserva(String id_usuario, String id_espacio, String fecha, TimeOfDay hora) async {
+  Future<void> deleteReserva(String id_usuario, String id_espacio, String fecha, TimeOfDay hora, String estado) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Reservas')
@@ -63,6 +64,7 @@ class Reserva{
           .where('id_espacio', isEqualTo: id_espacio)
           .where('fecha', isEqualTo: fecha)
           .where('hora', isEqualTo: '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}')
+          .where('estado', isEqualTo: estado)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
@@ -79,32 +81,55 @@ class Reserva{
   }
 
   // Método para modificar el estado de una reserva en la base de datos.
-  Future<void> updateEstado(String id_usuario, String id_espacio, String fecha, TimeOfDay hora, String nuevoEstado) async {
+  Future<bool> updateEstado(String id_usuario, String id_espacio, String fecha, TimeOfDay hora, String nuevoEstado) async {
     try {
-      final querySnapshot = await FirebaseFirestore.instance
+      final horaString = '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}';
+
+      if (nuevoEstado == 'aceptada') {
+        // Revisar si ya existe otra reserva aceptada en ese espacio, fecha y hora
+        final ocupacionQuery = await FirebaseFirestore.instance
+            .collection('Reservas')
+            .where('id_espacio', isEqualTo: id_espacio)
+            .where('fecha', isEqualTo: fecha)
+            .where('hora', isEqualTo: horaString)
+            .where('estado', isEqualTo: 'aceptada')
+            .get();
+
+        // Si ya existe, no permitimos aceptar
+        if (ocupacionQuery.docs.isNotEmpty) {
+          return false;
+        }
+      }
+
+      // Actualizar la reserva (buscarla primero)
+      final reservaQuery = await FirebaseFirestore.instance
           .collection('Reservas')
           .where('id_usuario', isEqualTo: id_usuario)
           .where('id_espacio', isEqualTo: id_espacio)
           .where('fecha', isEqualTo: fecha)
-          .where('hora', isEqualTo: '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}')
+          .where('hora', isEqualTo: horaString)
           .get();
 
-      if (querySnapshot.docs.isNotEmpty) {
+      if (reservaQuery.docs.isNotEmpty) {
         await FirebaseFirestore.instance
             .collection('Reservas')
-            .doc(querySnapshot.docs.first.id)
+            .doc(reservaQuery.docs.first.id)
             .update({'estado': nuevoEstado});
+        return true;
       } else {
         print('Reserva no encontrada con los datos proporcionados.');
+        return false;
       }
     } catch (e) {
       print('Error actualizando estado de reserva: $e');
+      return false;
     }
   }
 
+
   // Método para obtener todas las reservas según el estado.
-  Future<List<Map<String, dynamic>>> getReservasPorEstado(String estado) async {
-    List<Map<String, dynamic>> reservas = [];
+  static Future<List<Reserva>> getReservasPorEstado(String estado) async {
+    List<Reserva> reservas = [];
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Reservas')
@@ -112,7 +137,7 @@ class Reserva{
           .get();
 
       for (var doc in querySnapshot.docs) {
-        reservas.add(doc.data() as Map<String, dynamic>);
+        reservas.add(Reserva.fromMap(doc.data()));
       }
     } catch (e) {
       print('Error obteniendo reservas por estado: $e');
