@@ -36,6 +36,8 @@ class _CrearUsuarioState extends State<CrearUsuario> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Usuario creado con éxito')),
     );
+
+    Navigator.pop(context);
   }
 
   @override

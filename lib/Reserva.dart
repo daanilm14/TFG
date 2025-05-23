@@ -33,6 +33,7 @@ class Reserva{
 
   // Método para convertir un mapa a un objeto Reserva.
   static Reserva fromMap(Map<String, dynamic> data) {
+    print(data);
     return Reserva(
       id_usuario: data['id_usuario'],
       id_espacio: data['id_espacio'],
@@ -284,8 +285,15 @@ class Reserva{
         reservas.add(Reserva.fromMap(doc.data()));
         print('Reserva obtenida: ${doc.data()}');
       }
+      print('Reservas obtenidas: $reservas');
     } catch (e) {
       print('Error obteniendo reservas por fecha: $e');
+      if (e is FirebaseException) {
+        print('Código de error: ${e.code}');
+        print('Mensaje de error: ${e.message}');
+        print('Stacktrace: ${e.stackTrace}');
+      }
+
     }
     
     return reservas;
