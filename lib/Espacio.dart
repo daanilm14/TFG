@@ -1,19 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+// Clase que representa un espacio físico del sistema (aula, laboratorio...).
+// Contiene atributos como nombre, capacidad, horarios de uso y descripción.
+// Incluye métodos para gestionar los espacios en la base de datos.
 class Espacio{
   // Atributos.
-  String? id_espacio;
-  String nombre; 
-  int capacidad;
-  TimeOfDay horarioIni;
-  TimeOfDay horarioFin;
-  String descripcion;
+  String? id_espacio;     // Identificador único del espacio en Firestore (opcional, puede ser null al crear un nuevo espacio).
+  String nombre;          // Nombre del espacio (aula, laboratorio...).
+  int capacidad;          // Capacidad máxima del espacio (número de personas que puede albergar).
+  TimeOfDay horarioIni;   // Hora de inicio de disponibilidad del espacio (formato TimeOfDay).
+  TimeOfDay horarioFin;   // Hora de fin de disponibilidad del espacio (formato TimeOfDay).
+  String descripcion;     // Descripción del espacio (detalles adicionales, características...).
 
   // Constructor.
   Espacio({this.id_espacio, required this.nombre, required this.capacidad, required this.horarioIni, required this.horarioFin, required this.descripcion});
 
-  // Método para agregar un espacio a la base de datos.
+  // Agrega un nuevo espacio a la colección 'Espacios' en la base de datos.
+  //
+  // Entradas:
+  // - [nombre]: Nombre del espacio.
+  // - [capacidad]: Capacidad numérica.
+  // - [horarioIni]: Hora de inicio de disponibilidad.
+  // - [horarioFin]: Hora de fin de disponibilidad.
+  // - [descripcion]: Texto descriptivo del espacio.
+  //
   Future<void> addEspacio(String nombre, int capacidad, TimeOfDay horarioIni, TimeOfDay horarioFin, String descripcion) async {
     try {
       await FirebaseFirestore.instance.collection('Espacios').add({
@@ -29,14 +40,19 @@ class Espacio{
     }
   }
 
-  // Método para eliminar un espacio de la base de datos.
+  // Elimina un espacio de la base de datos a partir de su nombre.
+  //
+  // Entradas:
+  // - [nombre]: Nombre del espacio a eliminar.
+  //
   Future<void> deleteEspacio(String nombre) async {
     try {
+      // Buscar el espacio por nombre
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Espacios')
           .where('nombre', isEqualTo: nombre)
           .get();
-
+      // Si se encuentra al menos un espacio con ese nombre, eliminar el primero
       if (querySnapshot.docs.isNotEmpty) {
         await FirebaseFirestore.instance
             .collection('Espacios')
@@ -50,26 +66,28 @@ class Espacio{
     }
   }
 
-  //Método para modificar el nombre de un espacio en la base de datos.
- Future<bool> updateNombre(String nombre, String nuevoNombre) async {
+  // Actualiza el nombre de un espacio en la base de datos.
+  //
+  // Entradas:
+  // - [nombre]: Nombre actual del espacio.
+  // - [nuevoNombre]: Nuevo nombre propuesto.
+  //
+  Future<bool> updateNombre(String nombre, String nuevoNombre) async {
   try {
-    // Verificar si ya existe un espacio con el nuevo nombre
-    final existingQuerySnapshot = await FirebaseFirestore.instance
-        .collection('Espacios')
-        .where('nombre', isEqualTo: nuevoNombre)
-        .get();
 
-    if (existingQuerySnapshot.docs.isNotEmpty) {
-      print('Ya existe un espacio con el nuevo nombre proporcionado.');
-      return false; // No realizar cambios si el nombre está repetido
+    // Verificar que el nuevo nombre no esté asignado a otro espacio
+    final existe = await existeEspacio(nuevoNombre);
+    if (existe) {
+      print('El nombre "$nuevoNombre" ya está en uso por otro espacio.');
+      return false; // No se puede actualizar, el nuevo nombre ya existe
     }
-
     // Buscar el espacio con el nombre actual
     final querySnapshot = await FirebaseFirestore.instance
         .collection('Espacios')
         .where('nombre', isEqualTo: nombre)
         .get();
 
+    // Si se encuentra al menos un espacio con ese nombre, actualizar el primero
     if (querySnapshot.docs.isNotEmpty) {
       await FirebaseFirestore.instance
           .collection('Espacios')
@@ -84,17 +102,45 @@ class Espacio{
     print('Error actualizando nombre de espacio: $e');
     return false;
   }
-}
+  }
 
-
-  // Método para modificar la capacidad de un espacio en la base de datos.
-  Future<void> updateCapacidad(String nombre, int nuevaCapacidad) async {
+  // Verifica si un espacio con el nombre dado ya existe en la base de datos.
+  //
+  // Entradas:
+  // - [nombre]: Nombre del espacio a verificar.
+  //
+  // Salida: Retorna true si existe al menos un espacio con ese nombre, false en caso contrario.
+  //
+  static Future<bool> existeEspacio(String nombre) async {
     try {
+      // Buscar el espacio por nombre
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Espacios')
           .where('nombre', isEqualTo: nombre)
           .get();
+      // Si se encuentra al menos un espacio con ese nombre, retornar true
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error verificando existencia de espacio: $e');
+      return false;
+    }
+  }
 
+
+  // Actualiza la capacidad del espacio especificado por su nombre.
+  //
+  // Entradas:
+  // - [nombre]: Nombre del espacio.
+  // - [nuevaCapacidad]: Nueva capacidad a asignar.
+  //
+  Future<void> updateCapacidad(String nombre, int nuevaCapacidad) async {
+    try {
+      // Buscar el espacio por nombre
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Espacios')
+          .where('nombre', isEqualTo: nombre)
+          .get();
+      // Si se encuentra al menos un espacio con ese nombre, actualizar el primero
       if (querySnapshot.docs.isNotEmpty) {
         await FirebaseFirestore.instance
             .collection('Espacios')
@@ -108,20 +154,27 @@ class Espacio{
     }
   }
 
-  // Método para modificar el horario inicial de un espacio en la base de datos.
+  // Actualiza la hora de inicio del espacio.
+  //
+  // Entradas:
+  // - [nombre]: Nombre del espacio.
+  // - [nuevoHorarioIni]: Nueva hora de inicio.
+  //
   Future<void> updateHorarioIni(String nombre, TimeOfDay nuevoHorarioIni) async {
     try {
+      // Buscar el espacio por nombre
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Espacios')
           .where('nombre', isEqualTo: nombre)
           .get();
 
+      // Si se encuentra al menos un espacio con ese nombre, actualizar el primero
       if (querySnapshot.docs.isNotEmpty) {
         await FirebaseFirestore.instance
             .collection('Espacios')
             .doc(querySnapshot.docs.first.id)
-            .update({
-          'horarioIni': '${nuevoHorarioIni.hour.toString().padLeft(2, '0')}:${nuevoHorarioIni.minute.toString().padLeft(2, '0')}',
+            .update({ // Actualizar el campo horarioIni
+          'horarioIni': '${nuevoHorarioIni.hour.toString().padLeft(2, '0')}:${nuevoHorarioIni.minute.toString().padLeft(2, '0')}', // Formatear la hora como "HH:mm"
         });
       } else {
         print('Espacio no encontrado con el nombre proporcionado.');
@@ -131,20 +184,26 @@ class Espacio{
     }
   }
 
-  // Método para modificar el horario final de un espacio en la base de datos.
+  // Actualiza la hora de fin del espacio.
+  //
+  // Entradas:
+  // - [nombre]: Nombre del espacio.
+  // - [nuevoHorarioFin]: Nueva hora de fin.
+  //
   Future<void> updateHorarioFin(String nombre, TimeOfDay nuevoHorarioFin) async {
     try {
+      // Buscar el espacio por nombre
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Espacios')
           .where('nombre', isEqualTo: nombre)
           .get();
-
+      // Si se encuentra al menos un espacio con ese nombre, actualizar el primero
       if (querySnapshot.docs.isNotEmpty) {
         await FirebaseFirestore.instance
             .collection('Espacios')
             .doc(querySnapshot.docs.first.id)
-            .update({
-          'horarioFin': '${nuevoHorarioFin.hour.toString().padLeft(2, '0')}:${nuevoHorarioFin.minute.toString().padLeft(2, '0')}',
+            .update({ // Actualizar el campo horarioFin
+          'horarioFin': '${nuevoHorarioFin.hour.toString().padLeft(2, '0')}:${nuevoHorarioFin.minute.toString().padLeft(2, '0')}',  // Formatear la hora como "HH:mm"
         });
       } else {
         print('Espacio no encontrado con el nombre proporcionado.');
@@ -154,14 +213,21 @@ class Espacio{
     }
   }
 
-  // Método para modificar la descripción de un espacio en la base de datos.
+  // Actualiza la descripción de un espacio dado su nombre.
+  //
+  // Entradas:
+  // - [nombre]: Nombre del espacio.
+  // - [nuevaDescripcion]: Nueva descripción.
+  //
   Future<void> updateDescripcion(String nombre, String nuevaDescripcion) async {
     try {
+      // Buscar el espacio por nombre
       final querySnapshot = await FirebaseFirestore.instance
           .collection('Espacios')
           .where('nombre', isEqualTo: nombre)
           .get();
 
+      // Si se encuentra al menos un espacio con ese nombre, actualizar el primero
       if (querySnapshot.docs.isNotEmpty) {
         await FirebaseFirestore.instance
             .collection('Espacios')
@@ -175,19 +241,26 @@ class Espacio{
     }
   }
 
-
+  // Recupera todos los espacios disponibles desde Firestore.
+  //
+  // Entradas: Ninguna.
+  // Salida: Lista de objetos `Espacio`.
+  //
   static Future<List<Espacio>> getEspacios() async {
-    List<Espacio> espacios = [];
+    List<Espacio> espacios = [];  // Lista para almacenar los espacios recuperados
     try {
+      // Obtener todos los documentos de la colección 'Espacios'
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Espacios').get();
 
+      // Si no hay documentos, retornar lista vacía
       if (querySnapshot.docs.isEmpty) {
         print('No hay espacios disponibles.');
         return espacios;
       }
 
+      // Iterar sobre los documentos recuperados
       for (var doc in querySnapshot.docs) {
-        espacios.add(Espacio(
+        espacios.add(Espacio(         // Crear un objeto Espacio por cada documento
           id_espacio: doc.id,
           nombre: doc['nombre'],
           capacidad: doc['capacidad'],
@@ -202,88 +275,34 @@ class Espacio{
     return espacios;
   }
 
-  // Función auxiliar para convertir String "HH:mm" a TimeOfDay
+  // Convierte una cadena "HH:mm" a un objeto `TimeOfDay`.
+  //
+  // Entradas:
+  // - [horaStr]: Hora en formato string.
+  // Salida: Objeto `TimeOfDay`.
+  //
   static TimeOfDay _parseHora(String horaStr) {
-    final parts = horaStr.split(':');
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
-    return TimeOfDay(hour: hour, minute: minute);
+    final parts = horaStr.split(':');     // Dividir la cadena en horas y minutos
+    final hour = int.parse(parts[0]);     // Convertir la parte de horas a entero
+    final minute = int.parse(parts[1]);     // Convertir la parte de minutos a entero
+    return TimeOfDay(hour: hour, minute: minute);   // Retornar un objeto TimeOfDay con las horas y minutos
   }
 
-
-  // Obtener un espacio por nombre
- static Future<Espacio?> getEspacioPorNombre(String nombre) async {
-    try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('Espacios')
-          .where('nombre', isEqualTo: nombre)
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        var doc = querySnapshot.docs.first;
-        return Espacio(
-          nombre: doc['nombre'],
-          capacidad: doc['capacidad'],
-          horarioIni: _parseHora(doc['horarioIni']),
-          horarioFin: _parseHora(doc['horarioFin']),
-          descripcion: doc['descripcion'],
-        );
-      } else {
-        print('Espacio no encontrado con el nombre proporcionado.');
-        return null;
-      }
-    } catch (e) {
-      print('Error obteniendo espacio por nombre: $e');
-      return null;
-    }
-  }
-
-  // Obtener espacio por ID (documentId)
-  static Future<Espacio?> getEspacioPorId(String docId) async {
-    try {
-      final doc = await FirebaseFirestore.instance.collection('Espacios').doc(docId).get();
-
-      if (doc.exists) {
-        var data = doc.data()!;
-        return Espacio(
-          nombre: data['nombre'],
-          capacidad: data['capacidad'],
-          horarioIni: _parseHora(data['horarioIni']),
-          horarioFin: _parseHora(data['horarioFin']),
-          descripcion: data['descripcion'],
-        );
-      } else {
-        print('Espacio no encontrado con el id proporcionado.');
-        return null;
-      }
-    } catch (e) {
-      print('Error obteniendo espacio por ID: $e');
-      return null;
-    }
-  }
-
-  // Verificar si un espacio existe por nombre
-  static Future<bool> existeEspacioConNombre(String nombre) async {
-    try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('Espacios')
-          .where('nombre', isEqualTo: nombre)
-          .get();
-
-      return querySnapshot.docs.isNotEmpty;
-    } catch (e) {
-      print('Error verificando existencia de espacio: $e');
-      return false;
-    }
-  }
-
+  // Obtiene el nombre de un espacio a partir de su ID.
+  //
+  // Entradas:
+  // - [uid]: Identificador del documento del espacio.
+  // Salida: Nombre del espacio o cadena vacía.
+  //
   static Future<String> getNombre(String uid) async {
     try {
+      // Obtener el documento del espacio por su ID
       DocumentSnapshot doc = await FirebaseFirestore.instance.collection('Espacios').doc(uid).get();
 
+      // Verificar si el documento existe
       if (doc.exists) {
-        Map<String, dynamic> datosEspacio = doc.data() as Map<String, dynamic>;
-        return datosEspacio['nombre'];
+        Map<String, dynamic> datosEspacio = doc.data() as Map<String, dynamic>; // Obtener los datos del espacio
+        return datosEspacio['nombre'];  // Retornar el nombre del espacio
       } else {
         print("Espacios no encontrado en Firestore.");
         return '';

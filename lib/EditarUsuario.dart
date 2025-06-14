@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:tfg/Usuario.dart';
 
+// Clase que permite editar un usuario existente.
+// Permite cambiar la contraseña y el rol del usuario.
+// También permite eliminar el usuario de la base de datos.
 class EditarUsuario extends StatefulWidget {
-  final Usuario usuario;
-  const EditarUsuario({super.key, required this.usuario});
+  final Usuario usuario;      // Usuario a editar   
+  const EditarUsuario({super.key, required this.usuario});  // Constructor que recibe el usuario a editar
 
   @override
-  State<EditarUsuario> createState() => _EditarUsuarioState();
+  State<EditarUsuario> createState() => _EditarUsuarioState();    
 }
 
 class _EditarUsuarioState extends State<EditarUsuario> {
-  final List<String> roles = ['administrador', 'usuario'];
-  final TextEditingController contrasenaController = TextEditingController();
-  late String rolSeleccionado;
+  final List<String> roles = ['administrador', 'usuario'];  // Lista de roles disponibles
+  final TextEditingController contrasenaController = TextEditingController(); // Controlador para el campo de contraseña
+  late String rolSeleccionado;  // Rol seleccionado por el usuario
 
   @override
   void initState() {
@@ -24,17 +27,18 @@ class _EditarUsuarioState extends State<EditarUsuario> {
   // Se actualiza la contraseña y el rol del usuario en la base de datos.
   // Se muestra un mensaje de éxito o error según corresponda.
   void editarUsuario() async {
-    final contrasena = contrasenaController.text.trim();
-    final rol = rolSeleccionado;
-
-    if (contrasena.isEmpty && rol == widget.usuario.rol) {
+    final contrasena = contrasenaController.text.trim();          // Obtener la contraseña ingresada
+    final rol = rolSeleccionado;                                  // Obtener el rol seleccionado
+    
+    // Validaciones
+    if (contrasena.isEmpty && rol == widget.usuario.rol) {                    // Contraseña vacía y rol sin cambios
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No hay cambios para guardar')),
       );
       return;
     }
 
-    if (contrasena.isNotEmpty && contrasena.length < 6) {
+    if (contrasena.isNotEmpty && contrasena.length < 6) {                     // Contraseña de menos de 6 caracteres     
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('La contraseña debe tener al menos 6 caracteres')),
       );
@@ -42,17 +46,18 @@ class _EditarUsuarioState extends State<EditarUsuario> {
     }
 
     try {
-      if (contrasena.isNotEmpty && contrasena.length >= 6) {
+      if (contrasena.isNotEmpty && contrasena.length >= 6) {                  // Si se ingresó una nueva contraseña válida                
         await widget.usuario.updatePassword(contrasena);
       }
 
-      if (rol != widget.usuario.rol) {
+      if (rol != widget.usuario.rol) {                                         // Si el rol ha cambiado               
         await widget.usuario.updateRol(widget.usuario.uid, rol);
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cambios guardados correctamente')),
       );
+       Navigator.pop(context); // Volver atrás después de eliminar
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al actualizar: $e')),
@@ -140,12 +145,12 @@ class _EditarUsuarioState extends State<EditarUsuario> {
                   // CAMPO CONTRASEÑA
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: const Text(
+                    child: const Text(  
                       'Contraseña',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                  TextField(
+                  TextField(    // Campo de texto para ingresar la nueva contraseña
                     controller: contrasenaController,
                     obscureText: true,
                     decoration: InputDecoration(
@@ -166,7 +171,7 @@ class _EditarUsuarioState extends State<EditarUsuario> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                  DropdownButtonFormField<String>(
+                  DropdownButtonFormField<String>(  // Campo desplegable para seleccionar el rol del usuario
                     value: rolSeleccionado,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
@@ -186,15 +191,15 @@ class _EditarUsuarioState extends State<EditarUsuario> {
                     }).toList(),
                   ),
 
-                  const SizedBox(height: 50), // Espacio extra antes de los botones
+                  const SizedBox(height: 50), 
 
                   // BOTONES GUARDAR Y BORRAR
                   Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        ElevatedButton(
-                          onPressed: editarUsuario,
+                        ElevatedButton(   // Botón para guardar los cambios
+                          onPressed: editarUsuario, // Llama al método editarUsuario
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
                             shape: RoundedRectangleBorder(
@@ -211,8 +216,8 @@ class _EditarUsuarioState extends State<EditarUsuario> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        ElevatedButton(
-                          onPressed: borrarUsuario,
+                        ElevatedButton(   // Botón para borrar el usuario
+                          onPressed: borrarUsuario, // Llama al método borrarUsuario
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             shape: RoundedRectangleBorder(

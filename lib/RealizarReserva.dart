@@ -6,13 +6,15 @@ import 'HomeAdmin.dart';
 import 'HomeUser.dart';
 import 'package:intl/intl.dart';
 
+// Clase para realizar una reserva de un espacio
+// Esta interfaz permite al usuario solicitar una reserva para un espacio específico
 class RealizarReserva extends StatefulWidget {
-  final Usuario usuario;
-  final Espacio espacio;
-  final String fecha;
-  final TimeOfDay hora;
+  final Usuario usuario;    // Usuario que está realizando la reserva
+  final Espacio espacio;    // Espacio que se va a reservar
+  final String fecha;       // Fecha de la reserva en formato 'dd/MM/yyyy'
+  final TimeOfDay hora;     // Hora de la reserva
 
-  const RealizarReserva({
+  const RealizarReserva({   // Constructor de la clase
     super.key,
     required this.usuario,
     required this.espacio,
@@ -25,17 +27,18 @@ class RealizarReserva extends StatefulWidget {
 }
 
 class _RealizarReservaState extends State<RealizarReserva> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _eventoController = TextEditingController();
-  final TextEditingController _descripcionController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();                                      // Clave para el formulario de reserva
+  final TextEditingController _eventoController = TextEditingController();      // Controlador para el campo de nombre del evento
+  final TextEditingController _descripcionController = TextEditingController(); // Controlador para el campo de descripción del evento
 
+  // Método para construir la interfaz de usuario
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;      // Ancho de la pantalla
+    final screenHeight = MediaQuery.of(context).size.height;    // Altura de la pantalla
 
-    final double titleSize = screenWidth * 0.04;
-    final double backIconSize = screenWidth * 0.025;
+    final double titleSize = screenWidth * 0.04;                // Tamaño del título  
+    final double backIconSize = screenWidth * 0.025;            // Tamaño del ícono de retroceso
 
     // Formatear hora y fecha
     final String horaFormatted =
@@ -83,7 +86,7 @@ class _RealizarReservaState extends State<RealizarReserva> {
                       Text(
                         widget.espacio.nombre,
                         style: TextStyle(
-                          fontSize: screenWidth * 0.035, // Tamaño reducido
+                          fontSize: screenWidth * 0.035, 
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -115,9 +118,9 @@ class _RealizarReservaState extends State<RealizarReserva> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Evento", style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text("Evento", style: TextStyle(fontWeight: FontWeight.bold)),  // Título del campo de nombre del evento
                       const SizedBox(height: 8),
-                      TextFormField(
+                      TextFormField(  // Campo de texto para ingresar el nombre del evento
                         controller: _eventoController,
                         decoration: InputDecoration(
                           hintText: "Nombre del Evento",
@@ -134,9 +137,9 @@ class _RealizarReservaState extends State<RealizarReserva> {
                       ),
                       SizedBox(height: screenHeight * 0.03),
 
-                      const Text("Descripción", style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text("Descripción", style: TextStyle(fontWeight: FontWeight.bold)), // Título del campo de descripción del evento
                       const SizedBox(height: 8),
-                      TextFormField(
+                      TextFormField(  // Campo de texto para ingresar la descripción del evento
                         controller: _descripcionController,
                         decoration: InputDecoration(
                           hintText: "Descripción del Evento",
@@ -150,26 +153,26 @@ class _RealizarReservaState extends State<RealizarReserva> {
 
                     // BOTÓN SOLICITAR RESERVA
                     Center(
-                      child: ElevatedButton(
+                      child: ElevatedButton(  // Botón para solicitar la reserva
                         onPressed: () async {
 
-                          await Reserva.addReserva(
+                          await Reserva.addReserva( // Llama al método para agregar la reserva
                             widget.usuario.uid,
                             widget.espacio.id_espacio!,
                             widget.fecha,
                             widget.hora,
                             _eventoController.text,
                             _descripcionController.text,
-                            'pendiente',
+                            'pendiente',  // Estado de la reserva
                           );
 
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar( // Muestra un mensaje de éxito
                             const SnackBar(content: Text('Reserva solicitada con éxito')),
                           );
 
-                          Navigator.pop(context);
+                          Navigator.pop(context); // Regresa a la pantalla anterior
                         },
-                        style: ElevatedButton.styleFrom(
+                        style: ElevatedButton.styleFrom(  
                           backgroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                           shape: RoundedRectangleBorder(

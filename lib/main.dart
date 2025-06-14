@@ -5,76 +5,77 @@ import 'firebase_options.dart';
 import 'HomeAdmin.dart'; // Importamos la pantalla de inicio de administrador
 import 'HomeUser.dart'; // Importamos la pantalla de inicio de usuario
 
-
-
+// Clase principal de la aplicación
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+  WidgetsFlutterBinding.ensureInitialized();    // Asegura que los bindings de Flutter estén inicializados
+    await Firebase.initializeApp(               // Inicializa Firebase con las opciones predeterminadas
+    options: DefaultFirebaseOptions.currentPlatform,  
   );
-  runApp(MyApp());
+  runApp(MyApp());    // Ejecuta la aplicación
 }
 
+// Clase MyApp que define la estructura principal de la aplicación
 class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {  // Método build que construye la interfaz de usuario
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Gestión de Espacios',
+      title: 'Gestión de Espacios',   // Título de la aplicación
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: LoginScreen(),
+      home: LoginScreen(),      // Pantalla de inicio de sesión
     );
   }
 }
 
+// Clase LoginScreen que representa la pantalla de inicio de sesión
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  String mensajeError = '';
+  final TextEditingController emailController = TextEditingController();      // Controlador para el campo de correo electrónico
+  final TextEditingController passwordController = TextEditingController();   // Controlador para el campo de contraseña
+  String mensajeError = ''; // Variable para almacenar mensajes de error
 
+  // Método para iniciar sesión
   Future<void> iniciarSesion() async {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
+    String email = emailController.text.trim();           // Obtener el correo electrónico del controlador
+    String password = passwordController.text.trim();     // Obtener la contraseña del controlador
 
-    Usuario usuario = Usuario(uid: '',nombre: '',email: email, rol:'');
-    Map<String, dynamic>? datosUsuario = await usuario.loginUsuario(password);
-    print(datosUsuario); // Imprimir los datos del usuario para depuración
+    Usuario usuario = Usuario(uid: '',nombre: '',email: email, rol:'');       // Crear una instancia de Usuario con el correo electrónico
+    Map<String, dynamic>? datosUsuario = await usuario.loginUsuario(password);    // Iniciar sesión y obtener los datos del usuario
 
-    if (datosUsuario != null) {
+    if (datosUsuario != null) { // Si se obtienen datos del usuario
       String rol = datosUsuario['rol']; // Obtener el rol
 
       // Redirigir según el rol del usuario
-      if (rol == "administrador") {
+      if (rol == "administrador") { // Si es administrador
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeAdmin(usuario: usuario)),
+          MaterialPageRoute(builder: (context) => HomeAdmin(usuario: usuario)), // Redirigir a la pantalla de inicio de administrador
         );
-      } else {
+      } else {  // Si es usuario normal
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeUser(usuario: usuario)),
+          MaterialPageRoute(builder: (context) => HomeUser(usuario: usuario)),  // Redirigir a la pantalla de inicio de usuario
         );
       }
     } else {
-      setState(() {
+      setState(() { // Si no se obtienen datos, mostrar mensaje de error
         mensajeError = "Credenciales incorrectas o usuario no encontrado.";
       });
     }
   }
 
-
+  // Método para construir la interfaz de usuario
   @override
   Widget build(BuildContext context) {
     // Obtener dimensiones de la pantalla
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;    // Ancho de la pantalla
+    final screenHeight = MediaQuery.of(context).size.height;  // Alto de la pantalla
 
-    // Ancho de los campos de texto (70% del ancho de pantalla)
+    // Ancho de los campos de texto.
     final campoAncho = screenWidth * 0.6;
 
     return Scaffold(
@@ -158,6 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Método para construir un campo de texto. 
   Widget _buildTextField(TextEditingController controller, String hintText, double width,
       {bool isPassword = false}) {
     return SizedBox(
@@ -176,17 +178,6 @@ class _LoginScreenState extends State<LoginScreen> {
           contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 15),
         ),
       ),
-    );
-  }
-}
-
-
-class HomeScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Pantalla Principal")),
-      body: Center(child: Text("Bienvenido a la aplicación")),
     );
   }
 }

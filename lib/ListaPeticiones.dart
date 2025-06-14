@@ -3,6 +3,8 @@ import 'Reserva.dart';
 import 'Espacio.dart';
 import 'Usuario.dart';
 
+// Clase para mostrar una lista de peticiones de reservas pendientes
+// Esta interfaz permite al administrador ver las reservas pendientes
 class ListaPeticiones extends StatefulWidget {
   const ListaPeticiones({super.key});
 
@@ -23,15 +25,16 @@ class _ListaPeticionesState extends State<ListaPeticiones> {
   // Función para recargar las reservas (usada después de aceptar o eliminar)
   Future<void> recargarReservas() async {
     setState(() {
-      futureReservas = Reserva.getReservasPorEstado("pendiente");
+      futureReservas = Reserva.getReservasPorEstado("pendiente"); // Vuelve a cargar las reservas pendientes
     });
   }
 
+  // Construye la interfaz de usuario
   @override
   Widget build(BuildContext context) {
-    // Obtener tamaño de pantalla para diseño responsivo
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+  
+    final screenWidth = MediaQuery.of(context).size.width;    // Ancho de la pantalla
+    final screenHeight = MediaQuery.of(context).size.height;  // Altura de la pantalla
 
     final double titleSize = screenWidth * 0.04;      // Tamaño del texto del título
     final double backIconSize = screenWidth * 0.025;  // Tamaño del icono de retroceso
@@ -69,11 +72,11 @@ class _ListaPeticionesState extends State<ListaPeticiones> {
                           ),
                         ),
                       ),
-                      // Espacio para equilibrar la fila (misma anchura que el icono)
+
                       SizedBox(width: backIconSize),
                     ],
                   ),
-                  SizedBox(height: screenHeight * 0.04),  // Espacio debajo de la cabecera
+                  SizedBox(height: screenHeight * 0.04),  
                 ],
               ),
 
@@ -82,7 +85,6 @@ class _ListaPeticionesState extends State<ListaPeticiones> {
                 child: FutureBuilder<List<Reserva>>(
                   future: futureReservas,  // Esperamos a que se carguen las reservas
                   builder: (context, snapshot) {
-                    // Mientras carga, mostrar indicador circular
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
@@ -92,9 +94,9 @@ class _ListaPeticionesState extends State<ListaPeticiones> {
                       return const Center(child: Text("No hay peticiones pendientes."));
                     }
 
-                    final reservas = snapshot.data!;
+                    final reservas = snapshot.data!;  // Obtenemos la lista de reservas del snapshot
 
-                    // Mostrar lista de reservas con ListView.builder para eficiencia
+                    // Mostrar lista de reservas
                     return ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: reservas.length,
@@ -105,7 +107,7 @@ class _ListaPeticionesState extends State<ListaPeticiones> {
                         final horaString =
                             '${reserva.hora.hour.toString().padLeft(2, '0')}:${reserva.hora.minute.toString().padLeft(2, '0')}';
 
-                        return Card(
+                        return Card(    // Crear una tarjeta para cada reserva
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -116,7 +118,7 @@ class _ListaPeticionesState extends State<ListaPeticiones> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Mostrar nombre del usuario con FutureBuilder (carga asíncrona)
+                                // Mostrar nombre del usuario
                                 FutureBuilder<String>(
                                   future: Usuario.getNombre(reserva.id_usuario),
                                   builder: (context, userSnapshot) {
@@ -129,7 +131,7 @@ class _ListaPeticionesState extends State<ListaPeticiones> {
                                         const Icon(Icons.person,
                                             size: 20, color: Colors.blueGrey),
                                         const SizedBox(width: 8),
-                                        Text(
+                                        Text( // Mostrar nombre del usuario
                                           'Usuario: ',
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold,
@@ -149,7 +151,7 @@ class _ListaPeticionesState extends State<ListaPeticiones> {
 
                                 const SizedBox(height: 8),
 
-                                // Mostrar nombre del espacio con FutureBuilder (carga asíncrona)
+                                // Mostrar nombre del espacio 
                                 FutureBuilder<String>(
                                   future: Espacio.getNombre(reserva.id_espacio),
                                   builder: (context, espacioSnapshot) {
@@ -256,7 +258,7 @@ class _ListaPeticionesState extends State<ListaPeticiones> {
                                       onPressed: () async {
                                         // Llamar a la función para actualizar el estado de la reserva
                                         // Devuelve true si se pudo aceptar, false si el espacio está ocupado
-                                        bool exito = await reserva.updateEstado(
+                                        bool exito = await reserva.updateEstado(  // Llama al método updateEstado de la clase Reserva
                                           reserva.id_usuario,
                                           reserva.id_espacio,
                                           reserva.fecha,
@@ -294,19 +296,19 @@ class _ListaPeticionesState extends State<ListaPeticiones> {
                                       label: const Text('Aceptar'),
                                     ),
                                     const SizedBox(width: 12),
-                                    ElevatedButton.icon(
+                                    ElevatedButton.icon(  // Botón para eliminar la reserva
                                       onPressed: () async {
                                         // Eliminar la reserva y recargar lista
-                                        await reserva.deleteReserva(
+                                        await reserva.deleteReserva(  // Llama al método deleteReserva de la clase Reserva
                                           reserva.id_usuario,
                                           reserva.id_espacio,
                                           reserva.fecha,
                                           reserva.hora,
                                           reserva.estado,
                                         );
-                                        await recargarReservas();
+                                        await recargarReservas(); // Recargar reservas después de eliminar
                                       },
-                                      style: ElevatedButton.styleFrom(
+                                      style: ElevatedButton.styleFrom( 
                                         backgroundColor: Colors.red.shade600,
                                         foregroundColor: Colors.white,
                                         padding: const EdgeInsets.symmetric(

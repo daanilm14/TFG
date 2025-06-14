@@ -5,9 +5,19 @@ import 'Espacio.dart';
 import 'Reserva.dart';
 import 'GestionAdmin.dart';
 import 'RealizarReserva.dart';
+import 'main.dart';
 
+
+// Clase HomeAdmin
+// Esta clase representa la pantalla principal de administración
+// donde se pueden ver los espacios disponibles y las reservas realizadas.
+// Permite seleccionar una fecha y ver la disponibilidad de los espacios.
+// También permite realizar reservas para espacios disponibles.
+// Muestra una tabla con los espacios y sus horarios, marcando reservas y disponibilidad.
+// El usuario debe ser un administrador para acceder a esta pantalla.
+// 
 class HomeAdmin extends StatefulWidget {
-  final Usuario usuario;
+  final Usuario usuario;    // Usuario actual que ha iniciado sesión, debe ser administrador
 
   const HomeAdmin({super.key, required this.usuario});
 
@@ -30,7 +40,7 @@ class _HomeAdminState extends State<HomeAdmin> {
   @override
   void initState() {
     super.initState();
-    _loadData(); // Carga inicial de datos al iniciar
+    loadData(); // Carga inicial de datos al iniciar
   }
 
   @override
@@ -42,7 +52,7 @@ class _HomeAdminState extends State<HomeAdmin> {
   }
 
   // Carga datos de espacios y reservas según la fecha seleccionada
-  void _loadData() {
+  void loadData() {
     espacios = Espacio.getEspacios();
     String formattedDate = DateFormat('dd/MM/yyyy').format(_selectedDate);
     reservas = Reserva.getReservasPorFecha(formattedDate);
@@ -50,15 +60,15 @@ class _HomeAdminState extends State<HomeAdmin> {
 
   // Actualiza la fecha seleccionada y recarga los datos en caso de que se cambie 
   // la fecha en el selector.
-  void _onDateChanged(DateTime date) {
+  void onDateChanged(DateTime date) {
     setState(() {
       _selectedDate = date;
-      _loadData();
+      loadData();
     });
   }
 
   // Genera una lista de horas en formato string entre ini y fin (horas completas)
-  List<String> _generateHoras(TimeOfDay ini, TimeOfDay fin) {
+  List<String> generateHoras(TimeOfDay ini, TimeOfDay fin) {
     List<String> horas = [];
     for (int h = ini.hour; h < fin.hour; h++) {
       horas.add('${h.toString().padLeft(2, '0')}:00');
@@ -67,26 +77,26 @@ class _HomeAdminState extends State<HomeAdmin> {
   }
 
   // Muestra un selector de fecha y actualiza la fecha seleccionada
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void>selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime(2020),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
     if (picked != null && picked != _selectedDate) {
-      _onDateChanged(picked);
+      onDateChanged(picked);
     }
   }
 
   // Construye la tabla con horarios y espacios, marcando reservas y disponibilidad
-  Widget _buildTable(List<Espacio> espacios, List<Reserva> reservas) {
+  Widget buildTable(List<Espacio> espacios, List<Reserva> reservas) {
     Set<String> allHoras = {};
     Map<String, List<String>> espacioHoras = {};
 
     // Para cada espacio, generamos las horas disponibles y las almacenamos
     for (var espacio in espacios) {
-      final horas = _generateHoras(espacio.horarioIni, espacio.horarioFin);
+      final horas = generateHoras(espacio.horarioIni, espacio.horarioFin);
       espacioHoras[espacio.id_espacio ?? ''] = horas;
       allHoras.addAll(horas);
     }
@@ -94,6 +104,7 @@ class _HomeAdminState extends State<HomeAdmin> {
     // Ordenamos las horas para mostrar columnas en orden
     final sortedHoras = allHoras.toList()..sort();
 
+    // Construimos la tabla con filas y columnas
     return Scrollbar(
       controller: _verticalScrollController,
       thumbVisibility: true,
@@ -167,10 +178,10 @@ class _HomeAdminState extends State<HomeAdmin> {
                             final isDisponible = horasEspacio.contains(hora);
 
                             // Buscar si existe una reserva para ese espacio y hora
-                            final reserva = reservas.firstWhere(
+                            final reserva = reservas.firstWhere(  
                               (res) =>
-                                  res.id_espacio == espacio.id_espacio &&
-                                  res.hora == TimeOfDay(
+                                  res.id_espacio == espacio.id_espacio &&   
+                                  res.hora == TimeOfDay(    
                                       hour: int.parse(hora.split(':')[0]),
                                       minute: int.parse(hora.split(':')[1])),
                               orElse: () => Reserva(
@@ -186,7 +197,8 @@ class _HomeAdminState extends State<HomeAdmin> {
 
                             // Condición de que una reserva esté aceptada
                             final bool hayReserva = reserva.estado == 'aceptada';
-
+                            
+                            // Si no hay reserva y no está disponible, mostrar icono de bloqueo
                             return Container(
                               width: 100,
                               height: 48,
@@ -219,16 +231,16 @@ class _HomeAdminState extends State<HomeAdmin> {
                                               color: Colors.white),
                                           // Permite hacer reserva para hora/espacio disponibles
                                           onPressed: () {
-                                            Navigator.push(
+                                            Navigator.push( // Navega a la pantalla de reserva
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     RealizarReserva(
-                                                  usuario: widget.usuario,
-                                                  espacio: espacio,
+                                                  usuario: widget.usuario,  // Usuario actual
+                                                  espacio: espacio,         // Espacio seleccionado
                                                   fecha: DateFormat('dd/MM/yyyy')
-                                                      .format(_selectedDate),
-                                                  hora: TimeOfDay(
+                                                      .format(_selectedDate), // Formatea la fecha seleccionada
+                                                  hora: TimeOfDay(    // Convierte la hora a TimeOfDay
                                                     hour: int.parse(
                                                         hora.split(':')[0]),
                                                     minute: int.parse(
@@ -254,165 +266,189 @@ class _HomeAdminState extends State<HomeAdmin> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+ @override
+Widget build(BuildContext context) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  final screenHeight = MediaQuery.of(context).size.height;
 
-    // Tamaños relativos para texto e íconos según pantalla
-    final double titleSize = screenWidth * 0.04;
-    final double fontSize = screenWidth * 0.015;
-    final double iconContainerSize = titleSize * 1.2;
-    final double iconSize = titleSize * 0.6;
+  final double titleSize = screenWidth * 0.04;
+  final double fontSize = screenWidth * 0.015;
+  final double iconContainerSize = titleSize * 1.2;
+  final double iconSize = titleSize * 0.6;
 
-    String formattedDate = DateFormat('dd/MM/yyyy').format(_selectedDate);
+  String formattedDate = DateFormat('dd/MM/yyyy').format(_selectedDate);
 
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.04,
-            vertical: screenHeight * 0.005,
-          ),
-          child: Column(
-            children: [
-              // Cabecera con título y botón para gestionar administración
-              Row(
-                children: [
-                  SizedBox(width: iconContainerSize), // Espacio para balancear el layout
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'ADMINISTRACIÓN',
-                        style: TextStyle(
-                          fontSize: titleSize,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Botón para navegar a Gestión Admin
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => GestionAdmin(usuario: widget.usuario),
-                        ),
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(30),
-                    child: Column(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(top: titleSize * 0.2),
-                          width: iconContainerSize,
-                          height: iconContainerSize,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.settings, color: Colors.black, size: iconSize),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'GESTIÓN',
-                          style: TextStyle(fontSize: fontSize, color: Colors.black),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: screenHeight * 0.02),
-
-              // Selector de fecha y botón para abrir calendario
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Fecha:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  const SizedBox(width: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.blueGrey.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 3,
-                          offset: Offset(0, 1),
-                        )
-                      ],
-                    ),
-                    child: Text(
-                      formattedDate,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueGrey.shade700,
-                      foregroundColor: Colors.white,
-                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () => _selectDate(context),
-                    icon: const Icon(Icons.calendar_today, size: 20),
-                    label: const Text('Seleccionar fecha'),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: screenHeight * 0.03),
-
-              // Contenedor principal para la tabla de espacios y reservas
-              Expanded(
-                child: FutureBuilder<List<Espacio>>(
-                  future: espacios,
-                  builder: (context, snapshotEspacios) {
-                    if (snapshotEspacios.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (!snapshotEspacios.hasData || snapshotEspacios.data!.isEmpty) {
-                      return const Center(child: Text('No hay espacios disponibles'));
-                    }
-
-                    return FutureBuilder<List<Reserva>>(
-                      future: reservas,
-                      builder: (context, snapshotReservas) {
-                        if (snapshotReservas.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-
-                        final espacios = snapshotEspacios.data!;
-                        final reservas = snapshotReservas.data ?? [];
-
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 4,
-                          shadowColor: Colors.blueGrey.shade100,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: _buildTable(espacios, reservas),
-                          ),
-                        );
-                      },
+  return Scaffold(
+    backgroundColor: Colors.grey.shade50,
+    body: SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.04,
+          vertical: screenHeight * 0.005,
+        ),
+        child: Column(
+          children: [
+            // CABECERA
+            Row(
+              children: [
+                IconButton(
+                  iconSize: iconSize,
+                  icon: const Icon(Icons.logout),
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()), // Navega a la pantalla de login
+                      // Elimina todas las rutas anteriores para que no se pueda volver atrás
+                      (Route<dynamic> route) => false,
                     );
                   },
                 ),
+                Expanded( 
+                  child: Center(
+                    child: Text(    
+                      'ADMINISTRACIÓN', // Título de la pantalla
+                      style: TextStyle(
+                        fontSize: titleSize,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            GestionAdmin(usuario: widget.usuario),    // Navega a la pantalla de gestión
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(30),
+                  child: Column(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(top: titleSize * 0.2),
+                        width: iconContainerSize,
+                        height: iconContainerSize,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.settings,
+                            color: Colors.black, size: iconSize),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'GESTIÓN',
+                        style:
+                            TextStyle(fontSize: fontSize, color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: screenHeight * 0.02),
+
+            // Selector de fecha y botón para abrir calendario
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Fecha:',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(width: 10),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 3,
+                        offset: Offset(0, 1),
+                      )
+                    ],
+                  ),
+                  child: Text(
+                    formattedDate,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueGrey.shade700,
+                    foregroundColor: Colors.white,
+                    textStyle: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w600),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () =>selectDate(context),
+                  icon: const Icon(Icons.calendar_today, size: 20),
+                  label: const Text('Seleccionar fecha'),
+                ),
+              ],
+            ),
+
+            SizedBox(height: screenHeight * 0.03),
+
+            // Contenedor principal para la tabla de espacios y reservas
+            Expanded(
+              child: FutureBuilder<List<Espacio>>(
+                future: espacios,
+                builder: (context, snapshotEspacios) {
+                  if (snapshotEspacios.connectionState ==
+                      ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshotEspacios.hasData ||
+                      snapshotEspacios.data!.isEmpty) {
+                    return const Center(
+                        child: Text('No hay espacios disponibles'));
+                  }
+
+                  return FutureBuilder<List<Reserva>>(    
+                    future: reservas,
+                    builder: (context, snapshotReservas) {
+                      if (snapshotReservas.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      final espacios = snapshotEspacios.data!;          // Lista de espacios obtenida
+                      final reservas = snapshotReservas.data ?? [];     // Lista de reservas obtenida, puede ser vacía
+
+                      return Card(                                      // Contenedor de la tabla con estilo
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 4,
+                        shadowColor: Colors.blueGrey.shade100,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child:buildTable(espacios, reservas),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
