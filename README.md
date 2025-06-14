@@ -58,22 +58,22 @@ flutter run -d chrome
 ```
 
 ## 📂 Estructura del proyecto
-/lib
- ├── Usuario.dart              # Lógica del modelo de usuarios
- ├── Espacio.dart              # Lógica del modelo de espacios
- ├── Reserva.dart              # Lógica del modelo de reservas
- ├── HomeAdmin.dart            # Pantalla principal para administradores
- ├── HomeUser.dart             # Pantalla principal para usuarios
- ├── CrearUsuario.dart         # Formulario para crear nuevos usuarios
- ├── CrearEspacio.dart         # Formulario para crear nuevos espacios
- ├── ListaUsuarios.dart        # Vista para administrar usuarios
- ├── ListaEspacios.dart        # Vista para administrar espacios
- ├── ImportarHorarios.dart     # Funcionalidad de importación de reservas
- ├── RealizarReserva.dart      # Formulario de reserva para usuarios
+- /lib
+- ├── Usuario.dart              # Lógica del modelo de usuarios
+- ├── Espacio.dart              # Lógica del modelo de espacios
+- ├── Reserva.dart              # Lógica del modelo de reservas
+- ├── HomeAdmin.dart            # Pantalla principal para administradores
+- ├── HomeUser.dart             # Pantalla principal para usuarios
+- ├── CrearUsuario.dart         # Formulario para crear nuevos usuarios
+- ├── CrearEspacio.dart         # Formulario para crear nuevos espacios
+- ├── ListaUsuarios.dart        # Vista para administrar usuarios
+- ├── ListaEspacios.dart        # Vista para administrar espacios
+- ├── ImportarHorarios.dart     # Funcionalidad de importación de reservas
+- ├── RealizarReserva.dart      # Formulario de reserva para usuarios
 
  ## 📚 Autor
- Daniel Lozano Moya
- ✉️ lozanomoyadaniel@gmail.com
- 🧑‍💼 www.linkedin.com/in/danieellozano
+ - Daniel Lozano Moya
+ - ✉️ lozanomoyadaniel@gmail.com
+ - 🧑‍💼 www.linkedin.com/in/danieellozano
 
 
