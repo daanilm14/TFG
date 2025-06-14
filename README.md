@@ -70,6 +70,10 @@ flutter run -d chrome
 - ├── ListaEspacios.dart        # Vista para administrar espacios
 - ├── ImportarHorarios.dart     # Funcionalidad de importación de reservas
 - ├── RealizarReserva.dart      # Formulario de reserva para usuarios
+- ├── EditarUsuario.dart        # Pantalla de edición de un usuario
+- ├── EditarEspacio.dart        # Pantalla de edición de un espacio
+- ├── MisReservas.dart          # Pantalla de lista de reservas realizadas por un usuario
+- ├── firebase_options.dart     # Opciones necesarias para la inicialización de la aplicación
 
  ## 📚 Autor
  - Daniel Lozano Moya
